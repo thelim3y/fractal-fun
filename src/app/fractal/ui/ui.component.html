@@ -1,0 +1,14 @@
+<section class="fractal-ui">
+    <header>
+        <h1>Fractal Fun</h1>
+        <p>Written using Angular4, HTML5 Canvas</p>
+    </header>
+
+    <button (click)="_onRender.emit(true)">Render</button>
+    <button (click)="_onReset($event)">Reset</button>
+</section>
+
+<!--<p>Screen : {{_mousePos.x}}, {{_mousePos.y}}</p>
+<p>Complex: {{_mousePos._a}}, {{_mousePos._b}}</p>
+<input type="number" value={{_iterations}} (change)="onIterationChanged($event)">
+<input type="number" value={{_complexRadius}} (change)="onComplexRadiusChanged($event)">-->
