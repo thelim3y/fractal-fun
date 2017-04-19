@@ -44,7 +44,7 @@ exports = module.exports = __webpack_require__(22)();
 
 
 // module
-exports.push([module.i, ".fractal-ui {\n  width: 300px;\n  position: absolute;\n  top: 10px;\n  left: 10px;\n  background-color: rgba(0, 0, 0, 0.65);\n  opacity: 0.85;\n  color: white;\n  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7);\n  padding: 2em 1em;\n  border: 2px solid black;\n  font-size: 0.75em; }\n  .fractal-ui > div {\n    border-top: 3px solid black;\n    padding: 1em 0; }\n    .fractal-ui > div::last-child {\n      margin-bottom: 2em; }\n\nh1 {\n  font-size: 2.25em;\n  color: #FD3809;\n  margin: 0 0 0.5em;\n  text-align: center; }\n\np {\n  text-align: center;\n  margin: 0; }\n  p.credits {\n    color: #D46A6A; }\n\nbutton {\n  background-color: #333;\n  color: white;\n  border-radius: 3px;\n  border: 1px solid rgba(0, 0, 0, 0.8); }\n", ""]);
+exports.push([module.i, ".fractal-ui {\n  width: 300px;\n  position: absolute;\n  top: 10px;\n  left: 10px;\n  background-color: rgba(0, 0, 0, 0.65);\n  opacity: 0.85;\n  color: white;\n  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7);\n  padding: 2em 1em;\n  border: 2px solid black;\n  font-size: 0.75em; }\n  .fractal-ui > div {\n    border-top: 1px solid black;\n    padding: 1em 0; }\n    .fractal-ui > div::last-child {\n      margin-bottom: 2em; }\n\nh1 {\n  font-size: 2.25em;\n  color: #FD3809;\n  margin: 0 0 0.5em;\n  text-align: center; }\n\np {\n  text-align: center;\n  margin: 0; }\n  p.credits {\n    color: #D46A6A; }\n    p.credits a {\n      color: #D46A6A;\n      text-decoration: none; }\n      p.credits a:hover {\n        color: #FD3809;\n        text-decoration: none; }\n\nbutton {\n  background-color: #333;\n  color: white;\n  border-radius: 3px;\n  border: 1px solid rgba(0, 0, 0, 0.8); }\n", ""]);
 
 // exports
 
@@ -64,14 +64,14 @@ module.exports = "<router-outlet></router-outlet>"
 /***/ 158:
 /***/ (function(module, exports) {
 
-module.exports = "<canvas #fractal (click)=\"onClick($event)\"></canvas>\n<ui (onRender)=\"_renderMandelbrot($event)\"></ui>"
+module.exports = "<canvas #fractal (click)=\"onZoom($event)\"></canvas>\n<ui (onRender)=\"_renderMandelbrot($event)\"></ui>"
 
 /***/ }),
 
 /***/ 159:
 /***/ (function(module, exports) {
 
-module.exports = "<section class=\"fractal-ui\">\n    <div>\n        <h1>Fractal Fun</h1>\n        <p>With Angular4, HTML5 Canvas, and Typescript</p>\n    </div>\n\n    <div>\n        <button (click)=\"_onRender.emit(true)\">Render</button>\n        <button (click)=\"_onReset($event)\">Reset</button>\n    </div>\n\n    <div>\n        <p class=\"credits\">Written using Angular4, HTML5 Canvas</p>\n    </div>    \n</section>\n\n<!--<p>Screen : {{_mousePos.x}}, {{_mousePos.y}}</p>\n<p>Complex: {{_mousePos._a}}, {{_mousePos._b}}</p>\n<input type=\"number\" value={{_iterations}} (change)=\"onIterationChanged($event)\">\n<input type=\"number\" value={{_complexRadius}} (change)=\"onComplexRadiusChanged($event)\">-->\n"
+module.exports = "<section class=\"fractal-ui\">\n    <div>\n        <h1>Fractal Fun</h1>\n        <p>With Angular4, HTML5 Canvas, and Typescript</p>\n    </div>\n\n    <div>\n        <button (click)=\"_onRender.emit(true)\">Render</button>\n        <button (click)=\"_onReset($event)\">Reset</button>\n    </div>\n\n    <div>\n        <p class=\"credits\">Written by Justin Treen, <a target=\"_blank\" href=\"https://github.com/thelim3y/fractal-fun\">code on github</a></p>\n    </div>    \n</section>\n\n<!--<p>Screen : {{_mousePos.x}}, {{_mousePos.y}}</p>\n<p>Complex: {{_mousePos._a}}, {{_mousePos._b}}</p>\n<input type=\"number\" value={{_iterations}} (change)=\"onIterationChanged($event)\">\n<input type=\"number\" value={{_complexRadius}} (change)=\"onComplexRadiusChanged($event)\">-->\n"
 
 /***/ }),
 
@@ -173,10 +173,15 @@ var FractalComponent = (function () {
         this._escapeRadius = +ev.target.value;
         this._renderMandelbrot();
     };
-    FractalComponent.prototype.onClick = function (ev) {
+    FractalComponent.prototype.onZoom = function (ev) {
         var c = this._drawSpaceToComplexPlane(ev.offsetX, ev.offsetY);
         this._complexRoi.position(c.a, c.b);
-        this._zoomFactor *= this._zoomStep;
+        if (!ev.shiftKey) {
+            this._zoomFactor *= this._zoomStep;
+        }
+        else {
+            this._zoomFactor /= this._zoomStep;
+        }
         this._complexRoi.zoom(this._zoomFactor);
         this._renderMandelbrot();
     };
@@ -575,16 +580,15 @@ var Mandelbrot = (function () {
     }
     Mandelbrot.prototype.generate = function (cxMin, cxMax, cyMin, cyMax, iterations, radius) {
         var curPx = 0;
-        var rgba = [4];
         console.log('Iterations: ' + iterations);
         for (var y = 0; y < this._height; y++) {
             for (var x = 0; x < this._width; x++) {
                 var nx = x / (this._width - 1);
                 var ny = y / (this._height - 1);
-                var cx = nx * (cxMax - cxMin) + cxMin;
-                var cy = ny * (cyMax - cyMin) + cyMin;
-                var iterRet = this._iterator(cx, cy, iterations, radius);
-                rgba = (iterRet[0] < iterations) ? this._getColor(iterations, iterRet[0], iterRet[1], iterRet[2]) : [0, 0, 0, 255];
+                var cr = nx * (cxMax - cxMin) + cxMin;
+                var ci = ny * (cyMax - cyMin) + cyMin;
+                var iterRet = this._iterator(cr, ci, iterations, radius);
+                var rgba = (iterRet[0] < iterations) ? this._getColor(iterations, iterRet[0], iterRet[1], iterRet[2]) : [0, 0, 0, 255];
                 this._canvasData[curPx++] = rgba[0];
                 this._canvasData[curPx++] = rgba[1];
                 this._canvasData[curPx++] = rgba[2];
@@ -616,7 +620,7 @@ var Mandelbrot = (function () {
     };
     Mandelbrot.prototype._getColor = function (steps, n, Tr, Ti) {
         var v = this._smoothColor(n, Tr, Ti);
-        var c = this._hsv2Rgb(360.0 * v / steps, 1.0, 1.0);
+        var c = this._hsv2Rgb(360.0 * v / steps, 1, 1);
         c.push(255);
         return c;
     };
