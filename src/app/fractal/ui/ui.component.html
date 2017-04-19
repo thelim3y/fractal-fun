@@ -1,11 +1,17 @@
 <section class="fractal-ui">
-    <header>
+    <div>
         <h1>Fractal Fun</h1>
-        <p>Written using Angular4, HTML5 Canvas</p>
-    </header>
+        <p>With Angular4, HTML5 Canvas, and Typescript</p>
+    </div>
 
-    <button (click)="_onRender.emit(true)">Render</button>
-    <button (click)="_onReset($event)">Reset</button>
+    <div>
+        <button (click)="_onRender.emit(true)">Render</button>
+        <button (click)="_onReset($event)">Reset</button>
+    </div>
+
+    <div>
+        <p class="credits">Written using Angular4, HTML5 Canvas</p>
+    </div>    
 </section>
 
 <!--<p>Screen : {{_mousePos.x}}, {{_mousePos.y}}</p>

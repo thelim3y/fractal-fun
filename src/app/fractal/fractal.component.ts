@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/fromevent';
@@ -18,14 +19,17 @@ import { Mandelbrot } from '../shared/mandelbrot';
 export class FractalComponent implements OnInit, AfterViewInit {
     private _drawSpace: any = {
         width: 900,
-        height: 900
+        height: 900,
+        aspect: 1
     };
 
     private _iterations: number;
-    private _complexRadius: number;
+    private _calculatedIterations: number;
+    private _escapeRadius: number;
 
     private _complexRoi: ComplexRoi;
     private _zoomFactor: number;
+    private _zoomStep;
 
     private _mouseMove$: Observable<MouseEvent>;
     private _mousePos: any;
@@ -37,12 +41,12 @@ export class FractalComponent implements OnInit, AfterViewInit {
     private _mandelbrot: Mandelbrot;
 
 
-    constructor() {
+    constructor(private _router: Router, private _route: ActivatedRoute) {
     }
 
     ngOnInit() {
-        this._iterations = 1000;
-        this._complexRadius = 10;
+        this._iterations = 500;
+        this._escapeRadius = 4;
 
         this._mousePos = {
             x: 0,
@@ -50,13 +54,21 @@ export class FractalComponent implements OnInit, AfterViewInit {
         };
 
         this._zoomFactor = 1;
-        this._complexRoi = new ComplexRoi(-1, 0, 4, 4);
+        this._zoomStep = 2;
     }
 
     ngOnDestroy() {
     }
 
     ngAfterViewInit() {
+        this._drawSpace.width = window.innerWidth;
+        this._drawSpace.height = window.innerHeight;
+        this._drawSpace.aspect = window.innerHeight / window.innerWidth;
+
+        this._complexRoi = new ComplexRoi(-1, 0, 4, 4);
+        this._complexRoi.zoom(this._zoomFactor);
+        this._complexRoi.aspect(this._drawSpace.aspect);
+
         this._canvas.nativeElement.width = this._drawSpace.width;
         this._canvas.nativeElement.height = this._drawSpace.height;
 
@@ -77,13 +89,17 @@ export class FractalComponent implements OnInit, AfterViewInit {
         this._renderMandelbrot();
     }
 
+    private _calcComplexRoiAspect() {
+
+    }
+
     private onIterationChanged(ev) {
         this._iterations = +ev.target.value;
         this._renderMandelbrot();
     }
 
     private onComplexRadiusChanged(ev) {
-        this._complexRadius = +ev.target.value;
+        this._escapeRadius = +ev.target.value;
         this._renderMandelbrot();
     }
 
@@ -91,8 +107,9 @@ export class FractalComponent implements OnInit, AfterViewInit {
         let c = this._drawSpaceToComplexPlane(ev.offsetX, ev.offsetY);
         this._complexRoi.position(c.a, c.b);
 
-        this._zoomFactor *= 2;
+        this._zoomFactor *= this._zoomStep;
         this._complexRoi.zoom(this._zoomFactor);
+
         this._renderMandelbrot();
     }
 
@@ -111,6 +128,8 @@ export class FractalComponent implements OnInit, AfterViewInit {
     }
 
     private _renderMandelbrot() {
+        this._calculatedIterations = Math.floor(243 / Math.sqrt(0.001 + 2 * Math.min(this._complexRoi.width, this._complexRoi.heightSquared)));
+
         let ts = performance.now();
 
         this._mandelbrot.generate(
@@ -118,7 +137,8 @@ export class FractalComponent implements OnInit, AfterViewInit {
             this._complexRoi.right,
             this._complexRoi.top,
             this._complexRoi.bottom,
-            this._iterations);
+            this._calculatedIterations,
+            this._escapeRadius);
 
         console.log('Render time: ' + (performance.now() - ts).toFixed(2) + 'ms');
     }

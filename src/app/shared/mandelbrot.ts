@@ -19,11 +19,11 @@ export class Mandelbrot {
         this._canvasData = this._canvasImage.data;
     }
 
-    generate(cxMin: number, cxMax: number, cyMin: number, cyMax: number, iterations: number) {
+    generate(cxMin: number, cxMax: number, cyMin: number, cyMax: number, iterations: number, radius: number) {
         let curPx = 0;
         let rgba = [4];
 
-        console.log(iterations);
+        console.log('Iterations: ' + iterations);
 
         for(let y = 0; y < this._height; y++) {
             for(let x = 0; x < this._width; x++) {
@@ -33,7 +33,7 @@ export class Mandelbrot {
                 let cx = nx * (cxMax - cxMin) + cxMin;
                 let cy = ny * (cyMax - cyMin) + cyMin;
 
-                let iterRet = this._iterator(cx, cy, iterations);
+                let iterRet = this._iterator(cx, cy, iterations, radius);
 
                 rgba = (iterRet[0] < iterations) ? this._getColor(iterations, iterRet[0], iterRet[1], iterRet[2]): [0, 0, 0, 255];
 
@@ -47,25 +47,26 @@ export class Mandelbrot {
         this._canvasContext.putImageData(this._canvasImage, 0, 0);
     }
 
-    _iterator(cr: number, ci: number, n: number) {
+    _iterator(cr: number, ci: number, n: number, r: number) {
         let i = n;
+        let rr = r * r;
 
         let zr = 0;
         let zi = 0;
-        let zrr = 0;
-        let zii = 0;
+        let zr2 = 0;
+        let zi2 = 0;
         let zri = 0;
 
-        while(i-- && zrr + zii < 4) {
-            zrr = zr * zr;
-            zii = zi * zi;
+        while(i-- && zr2 + zi2 < rr) {
+            zr2 = zr * zr;
+            zi2 = zi * zi;
             zri = zr * zi;
 
-            zr = zrr - zii + cr;
+            zr = zr2 - zi2 + cr;
             zi = zri + zri + ci;
         }
 
-        return [n - i, zrr, zii];
+        return [n - i, zr2, zi2];
     }
 
     _smoothColor(n, a, b): number {
