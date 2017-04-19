@@ -103,11 +103,17 @@ export class FractalComponent implements OnInit, AfterViewInit {
         this._renderMandelbrot();
     }
 
-    public onClick(ev: MouseEvent) {
+    public onZoom(ev: MouseEvent) {
         let c = this._drawSpaceToComplexPlane(ev.offsetX, ev.offsetY);
         this._complexRoi.position(c.a, c.b);
 
-        this._zoomFactor *= this._zoomStep;
+        if(!ev.shiftKey) {
+            this._zoomFactor *= this._zoomStep;
+        }
+        else {
+            this._zoomFactor /= this._zoomStep;
+        }     
+
         this._complexRoi.zoom(this._zoomFactor);
 
         this._renderMandelbrot();

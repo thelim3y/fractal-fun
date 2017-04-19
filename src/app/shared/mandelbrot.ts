@@ -21,7 +21,6 @@ export class Mandelbrot {
 
     generate(cxMin: number, cxMax: number, cyMin: number, cyMax: number, iterations: number, radius: number) {
         let curPx = 0;
-        let rgba = [4];
 
         console.log('Iterations: ' + iterations);
 
@@ -30,12 +29,12 @@ export class Mandelbrot {
                 let nx = x / (this._width - 1);
                 let ny = y / (this._height - 1);
 
-                let cx = nx * (cxMax - cxMin) + cxMin;
-                let cy = ny * (cyMax - cyMin) + cyMin;
+                let cr = nx * (cxMax - cxMin) + cxMin;
+                let ci = ny * (cyMax - cyMin) + cyMin;
 
-                let iterRet = this._iterator(cx, cy, iterations, radius);
+                let iterRet = this._iterator(cr, ci, iterations, radius);
 
-                rgba = (iterRet[0] < iterations) ? this._getColor(iterations, iterRet[0], iterRet[1], iterRet[2]): [0, 0, 0, 255];
+                let rgba = (iterRet[0] < iterations) ? this._getColor(iterations, iterRet[0], iterRet[1], iterRet[2]): [0, 0, 0, 255];
 
                 this._canvasData[curPx++] = rgba[0];
                 this._canvasData[curPx++] = rgba[1];
@@ -77,7 +76,7 @@ export class Mandelbrot {
     _getColor(steps, n, Tr, Ti)
     {
         var v = this._smoothColor(n, Tr, Ti);
-        var c = this._hsv2Rgb(360.0 * v / steps, 1.0, 1.0);
+        var c = this._hsv2Rgb(360.0 * v / steps, 1, 1);
         c.push(255);
 
         return c;
