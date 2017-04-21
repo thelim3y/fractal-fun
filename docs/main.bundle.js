@@ -328,7 +328,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 
 
 var _ROUTES_ = [
-    { path: '', component: __WEBPACK_IMPORTED_MODULE_2__fractal_fractal_component__["a" /* FractalComponent */] }
+    { path: '', component: __WEBPACK_IMPORTED_MODULE_2__fractal_fractal_component__["a" /* FractalComponent */], pathMatch: 'full' }
 ];
 var AppRoutingModule = (function () {
     function AppRoutingModule() {
