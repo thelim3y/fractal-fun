@@ -6,7 +6,7 @@ import { FractalComponent } from './fractal/fractal.component';
 
 
 const _ROUTES_: Routes = [
-    { path: '', component: FractalComponent }
+    { path: '', component: FractalComponent, pathMatch: 'full' }
 ];
 
 @NgModule({
