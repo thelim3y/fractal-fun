@@ -1,2 +1,48 @@
+<section class="ui" [class.closed]="!showMenu" (click)="onOpenMenu($event)">
+    <i (click)="onCloseMenu($event)" class="fa fa-window-close fa-2x"></i>
+
+    <div>
+        <h1>Fractal Fun</h1>
+        <p>With Angular4, HTML5 Canvas, and Typescript</p>
+    </div>
+
+    <div>
+        <form novalidate [formGroup]="_form">
+            <label><span>Render Time:</span> {{(renderTime / 1000).toFixed(2)}} secs</label>
+            <label><span>iterations ({{calculatedIterations}})</span>
+                <input type="number" formControlName="iterations" min="50" step="10" />
+
+                <label>
+                    <input type="checkbox" formControlName="autoIteration" />&nbsp;
+                    Auto?
+                </label>
+            </label>
+
+            <label><span>Escape Radius</span>
+                <input type="number" formControlName="escapeRadius" min="1" step="1" />
+            </label>
+
+            <label>
+                <input type="checkbox" formControlName="showCoordinates" />&nbsp;
+                Show Coordinates?
+            </label>
+        </form>
+
+        <button (click)="onClickRender($event)">Render</button>
+        <button (click)="onReset($event)">Reset</button>
+    </div>
+
+    <div>
+        <p class="credits">Written by Justin, <a target="_blank" href="https://github.com/thelim3y/fractal-fun">code on github</a></p>
+        <br />
+        <p class="instructions">Left click to zoom and center at cursor, shift+left click to zoom out and center at cursor</p>
+    </div>    
+</section>
+
+<!--(contextmenu)="onZoom($event)"-->
 <canvas #fractal (click)="onZoom($event)"></canvas>
-<ui (onRender)="_renderMandelbrot($event)"></ui>
+
+<div class="coordinates" [style.opacity]="!!form.value.showCoordinates == true ? 0.35 : 0">
+    <p>Screen : {{_mousePos.x}}, {{_mousePos.y}}</p>
+    <p>Complex: {{_mousePos.cx}}, {{_mousePos.cy}}</p>
+</div>

@@ -22,7 +22,7 @@ export class Mandelbrot {
     generate(cxMin: number, cxMax: number, cyMin: number, cyMax: number, iterations: number, radius: number) {
         let curPx = 0;
 
-        console.log('Iterations: ' + iterations);
+        console.log(iterations, radius);
 
         for(let y = 0; y < this._height; y++) {
             for(let x = 0; x < this._width; x++) {

@@ -1,0 +1,13 @@
+body {
+    overflow: none;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+canvas {
+    display: block;
+    user-select: none;    
+}
+

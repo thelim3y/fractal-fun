@@ -9,13 +9,13 @@ export class ComplexRoi {
     private _aspect: number;
 
 
-    constructor(x: number, y: number, width: number, height: number) {
+    constructor(x: number, y: number, width: number, height: number, z: number, a: number) {
         this._x = x;
         this._y = y;
         this._width = width;
         this._height = height;
-
-        this._zoom = 1
+        this._zoom = 1 / z;
+        this._aspect = a;
     }
 
     public get top() : number {
@@ -73,5 +73,12 @@ export class ComplexRoi {
 
     public zoom(zoomFactor: number) {
         this._zoom = 1 / zoomFactor;
+    }
+
+    public drawSpaceToComplex(x: number, y: number, w: number, h: number): any {
+        return {
+            x: x / w * this.width + this.left,
+            y: y / h * this.height + this.top
+        }
     }
 }

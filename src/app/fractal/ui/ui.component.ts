@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl } from '@angular/forms';
 
 @Component({
     selector: 'ui',
@@ -8,7 +9,11 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 export class UiComponent implements OnInit {
     @Output('onRender') private _onRender: EventEmitter<any>;
 
-    constructor() {
+    @Input() public calculatedIterations: number;
+
+    
+
+    constructor(private _fb: FormBuilder) {
         this._onRender = new EventEmitter<any>();
     }
 
@@ -16,6 +21,6 @@ export class UiComponent implements OnInit {
     }
 
     private _onReset() {
-        
+
     }
 }

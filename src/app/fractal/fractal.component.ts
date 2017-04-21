@@ -1,7 +1,9 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
+import { FormBuilder, FormGroup, FormControl, Validators, AbstractControl } from '@angular/forms';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/switchmap';
 import 'rxjs/add/observable/fromevent';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/sample';
@@ -23,129 +25,200 @@ export class FractalComponent implements OnInit, AfterViewInit {
         aspect: 1
     };
 
-    private _iterations: number;
+    private _form: FormGroup;
+    private _rendering: boolean;
     private _calculatedIterations: number;
-    private _escapeRadius: number;
 
-    private _complexRoi: ComplexRoi;
-    private _zoomFactor: number;
-    private _zoomStep;
-
-    private _mouseMove$: Observable<MouseEvent>;
     private _mousePos: any;
-
-    private _mouseWheel$: Observable<WheelEvent>;
+    private _renderTime: number;
+    private _showMenu: boolean;
 
     @ViewChild('fractal') private _canvas;
 
     private _mandelbrot: Mandelbrot;
 
 
-    constructor(private _router: Router, private _route: ActivatedRoute) {
+    public get form(): FormGroup {
+        return this._form;
+    }
+
+    public get calculatedIterations(): number {
+        return this._calculatedIterations;
+    }
+
+    public get renderTime() : number {
+        return this._renderTime;
+    }
+    
+    public get showMenu() : boolean {
+        return this._showMenu;
+    }
+
+
+    constructor(
+        private _router: Router, 
+        private _route: ActivatedRoute,
+        private _fb: FormBuilder
+    ) {
     }
 
     ngOnInit() {
-        this._iterations = 500;
-        this._escapeRadius = 4;
+        this._reset();
 
-        this._mousePos = {
-            x: 0,
-            y: 0
-        };
+        const _mouseMove$: Observable<MouseEvent> = Observable.fromEvent(this._canvas.nativeElement, 'mousemove');
+        _mouseMove$
+            .sample(Observable.interval(50))
+            .subscribe((ev) => {
+                let c = this._getComplexView();
+                let fv: any = c.drawSpaceToComplex(ev.offsetX, ev.offsetY, this._drawSpace.width, this._drawSpace.height);
 
-        this._zoomFactor = 1;
-        this._zoomStep = 2;
+                this._mousePos = {
+                    cx: fv.x,
+                    cy: fv.y,
+                    x: ev.offsetX,
+                    y: ev.offsetY
+                }
+            });
     }
 
     ngOnDestroy() {
     }
 
     ngAfterViewInit() {
-        this._drawSpace.width = window.innerWidth;
-        this._drawSpace.height = window.innerHeight;
-        this._drawSpace.aspect = window.innerHeight / window.innerWidth;
-
-        this._complexRoi = new ComplexRoi(-1, 0, 4, 4);
-        this._complexRoi.zoom(this._zoomFactor);
-        this._complexRoi.aspect(this._drawSpace.aspect);
-
         this._canvas.nativeElement.width = this._drawSpace.width;
         this._canvas.nativeElement.height = this._drawSpace.height;
 
         this._mandelbrot = new Mandelbrot(this._canvas.nativeElement);
 
-        this._mouseMove$ = Observable.fromEvent(this._canvas.nativeElement, 'mousemove');
-        this._mouseMove$
-            .sample(Observable.interval(100))
-            .subscribe((ev) => {
-                this._mousePos = Object.assign({},
-                    this._drawSpaceToComplexPlane(ev.offsetX, ev.offsetY),
-                    {
-                        x: ev.offsetX,
-                        y: ev.offsetY
-                    });
-            });
+        this._form.setValue(Object.assign({}, this._form.value, this._getRouteQuery()));
 
         this._renderMandelbrot();
     }
 
-    private _calcComplexRoiAspect() {
-
+    private _getRouteQuery() {
+        return {
+            autoIteration: JSON.parse(this._route.snapshot.queryParams.autoIteration),
+            escapeRadius: +this._route.snapshot.queryParams.escapeRadius,
+            iterations: +this._route.snapshot.queryParams.iterations,
+            showCoordinates: JSON.parse(this._route.snapshot.queryParams.showCoordinates),
+            x: +this._route.snapshot.queryParams.x,
+            y: +this._route.snapshot.queryParams.y,
+            zoomFactor: +this._route.snapshot.queryParams.zoomFactor,
+            zoomStep: +this._route.snapshot.queryParams.zoomStep
+        };
     }
 
-    private onIterationChanged(ev) {
-        this._iterations = +ev.target.value;
-        this._renderMandelbrot();
+    private _reset() {
+        this._rendering = false;
+
+        this._showMenu = true;
+
+        this._drawSpace.width = window.innerWidth;
+        this._drawSpace.height = window.innerHeight;
+        this._drawSpace.aspect = window.innerHeight / window.innerWidth;
+
+        this._mousePos = {
+            cx: 'n/a',
+            cy: 'n/a',
+            x: 'n/a',
+            y: 'n/a'
+        };
+
+        // this._zoomFactor = 1;
+        // this._zoomStep = 2;
+        
+        // this._complexRoi = new ComplexRoi(-1, 0, 4, 4);
+        // this._complexRoi.zoom(this._zoomFactor);
+        // this._complexRoi.aspect(this._drawSpace.aspect);
+
+        this._form = this._fb.group({
+            'iterations': [100, [Validators.required, Validators.minLength(2)]],
+            'autoIteration': [true],
+            'escapeRadius': [4, [Validators.required, Validators.minLength(1)]],
+            'showCoordinates': [false],
+            'zoomFactor': [1],
+            'zoomStep': [2],
+            'x': [-1],
+            'y': [0]
+        });
+
+        this._form.valueChanges.subscribe((vals: any) => {
+            this._router.navigate([], {queryParams: this._form.value});
+        });
     }
 
-    private onComplexRadiusChanged(ev) {
-        this._escapeRadius = +ev.target.value;
-        this._renderMandelbrot();
+    public onCloseMenu(ev: MouseEvent) {
+        ev.stopPropagation();
+        this._showMenu = false;
+    }
+
+    public onOpenMenu(ev: MouseEvent) {
+        this._showMenu = true;
     }
 
     public onZoom(ev: MouseEvent) {
-        let c = this._drawSpaceToComplexPlane(ev.offsetX, ev.offsetY);
-        this._complexRoi.position(c.a, c.b);
+        if(this._rendering) {
+            return;
+        }
 
-        if(!ev.shiftKey) {
-            this._zoomFactor *= this._zoomStep;
+        let c = this._getComplexView();
+        let fv: any = c.drawSpaceToComplex(ev.offsetX, ev.offsetY, this._drawSpace.width, this._drawSpace.height);
+
+        if(ev.shiftKey) {
+            fv.zoomFactor = this._form.value.zoomFactor / this._form.value.zoomStep;
+            // this._zoomFactor /= this._zoomStep;
+        }
+        else if(ev.ctrlKey) {
+            // Just recenter for now
         }
         else {
-            this._zoomFactor /= this._zoomStep;
+            fv.zoomFactor = this._form.value.zoomFactor * this._form.value.zoomStep;
+            // this._zoomFactor *= this._zoomStep;
         }     
 
-        this._complexRoi.zoom(this._zoomFactor);
+        this._form.setValue(Object.assign({}, this._form.value, fv));
+
+        // this._complexRoi.zoom(this._zoomFactor);
 
         this._renderMandelbrot();
     }
 
-    private _drawSpaceToComplexPlane(x, y) {
-        let nx = x / this._drawSpace.width;
-        let ny = y / this._drawSpace.height;
-
-        return new ComplexNumber(
-            nx * this._complexRoi.width + this._complexRoi.left,
-            ny * this._complexRoi.height + this._complexRoi.top
-        );
+    public onClickRender(ev: MouseEvent) {
+        this._renderMandelbrot();
     }
 
-    public onClickRender(ev) {
+    public onReset(ev: MouseEvent) {
+        this._reset();
         this._renderMandelbrot();
+    }
+
+    private _getComplexView(): ComplexRoi {
+        return new ComplexRoi(+this._form.value.x, +this._form.value.y, 4, 4, +this._form.value.zoomFactor, +this._drawSpace.aspect);
     }
 
     private _renderMandelbrot() {
-        this._calculatedIterations = Math.floor(243 / Math.sqrt(0.001 + 2 * Math.min(this._complexRoi.width, this._complexRoi.heightSquared)));
+        this._rendering = true;
 
         let ts = performance.now();
 
-        this._mandelbrot.generate(
-            this._complexRoi.left,
-            this._complexRoi.right,
-            this._complexRoi.top,
-            this._complexRoi.bottom,
-            this._calculatedIterations,
-            this._escapeRadius);
+        let complexRoi = this._getComplexView();
 
-        console.log('Render time: ' + (performance.now() - ts).toFixed(2) + 'ms');
+        this._calculatedIterations = Math.floor(223 / Math.sqrt(0.001 + 2 * Math.min(complexRoi.width, complexRoi.height)));        
+
+        this._router.navigate([], {queryParams: this._form.value});
+
+        console.log(this._form.value);
+
+        this._mandelbrot.generate(
+            complexRoi.left,
+            complexRoi.right,
+            complexRoi.top,
+            complexRoi.bottom,
+            this._form.value.autoIteration ? this._calculatedIterations : this._form.value.iterations,
+            this._form.value.escapeRadius);
+
+        this._renderTime = performance.now() - ts;
+
+        this._rendering = false;
     }
 }
