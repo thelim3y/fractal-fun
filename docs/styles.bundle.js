@@ -1,21 +1,21 @@
 webpackJsonp([2,4],{
 
-/***/ 152:
+/***/ 150:
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(22)();
+exports = module.exports = __webpack_require__(30)();
 // imports
 
 
 // module
-exports.push([module.i, "", ""]);
+exports.push([module.i, "body {\n  overflow: none; }\n\n*, *::before, *::after {\n  box-sizing: inherit; }\n\ncanvas {\n  display: block;\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none; }\n", ""]);
 
 // exports
 
 
 /***/ }),
 
-/***/ 201:
+/***/ 199:
 /***/ (function(module, exports) {
 
 /*
@@ -268,15 +268,15 @@ function updateLink(linkElement, obj) {
 
 /***/ }),
 
-/***/ 205:
+/***/ 203:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(87);
+module.exports = __webpack_require__(88);
 
 
 /***/ }),
 
-/***/ 22:
+/***/ 30:
 /***/ (function(module, exports) {
 
 /*
@@ -333,16 +333,16 @@ module.exports = function() {
 
 /***/ }),
 
-/***/ 87:
+/***/ 88:
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(152);
+var content = __webpack_require__(150);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
-var update = __webpack_require__(201)(content, {});
+var update = __webpack_require__(199)(content, {});
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -360,5 +360,5 @@ if(false) {
 
 /***/ })
 
-},[205]);
+},[203]);
 //# sourceMappingURL=styles.bundle.js.map
