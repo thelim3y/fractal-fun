@@ -143,7 +143,7 @@ export class FractalComponent implements OnInit, AfterViewInit {
         });
 
         this._form.valueChanges.subscribe((vals: any) => {
-            this._router.navigate([], {queryParams: this._form.value});
+            this._router.navigate(['/'], {queryParams: this._form.value});
         });
     }
 
@@ -205,7 +205,7 @@ export class FractalComponent implements OnInit, AfterViewInit {
 
         this._calculatedIterations = Math.floor(223 / Math.sqrt(0.001 + 2 * Math.min(complexRoi.width, complexRoi.height)));        
 
-        this._router.navigate([], {queryParams: this._form.value});
+        this._router.navigate(['/'], {queryParams: this._form.value});
 
         console.log(this._form.value);
 

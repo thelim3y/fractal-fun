@@ -203,7 +203,7 @@ var FractalComponent = (function () {
             'y': [0]
         });
         this._form.valueChanges.subscribe(function (vals) {
-            _this._router.navigate([], { queryParams: _this._form.value });
+            _this._router.navigate(['/'], { queryParams: _this._form.value });
         });
     };
     FractalComponent.prototype.onCloseMenu = function (ev) {
@@ -249,7 +249,7 @@ var FractalComponent = (function () {
         var ts = performance.now();
         var complexRoi = this._getComplexView();
         this._calculatedIterations = Math.floor(223 / Math.sqrt(0.001 + 2 * Math.min(complexRoi.width, complexRoi.height)));
-        this._router.navigate([], { queryParams: this._form.value });
+        this._router.navigate(['/'], { queryParams: this._form.value });
         console.log(this._form.value);
         this._mandelbrot.generate(complexRoi.left, complexRoi.right, complexRoi.top, complexRoi.bottom, this._form.value.autoIteration ? this._calculatedIterations : this._form.value.iterations, this._form.value.escapeRadius);
         this._renderTime = performance.now() - ts;
